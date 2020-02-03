@@ -1,1 +1,7 @@
 /bin/
+
+/Documentation/
+
+*.dll
+*.so
+zdk.java.jar
