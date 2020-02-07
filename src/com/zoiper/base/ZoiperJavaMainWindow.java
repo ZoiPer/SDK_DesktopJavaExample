@@ -34,20 +34,20 @@ import com.zoiper.base.*;
 
 
 
-public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHandler, AccountEventsHandler {
+public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHandler, AccountEventsHandler, SIPProbeEventsHandler {
 
 	private Context ctx = null;
 	private Account account = null;
 	private AccountConfig regCfg = null;
 	private Result UserId = null;
 	private Map<String, Account> ActiveUsers = new HashMap<String, Account>();
-    private Map<String, Call> ActiveCalls = new HashMap<String, Call>();
+	private Map<String, Call> ActiveCalls = new HashMap<String, Call>();
 	private boolean updateCalls = false;
 	private long callId = 0;
-	
+
 	protected Shell shlZoiperSdk;
 	protected Shell OfflineActivationSh;
-	
+
 	String ActFoldPath = "";
 	private Button btnAddUser;
 	private Text tbUserName;
@@ -96,7 +96,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 	private Button btnAttTransfer;
 	private Button btnProbeSIP;
 	private CCombo cbDebugLevel;
-	
+
 	//check boxes in Add User group
 	private Button chPrivacy;
 	private Button chSRTP;
@@ -106,15 +106,15 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 	private Button chPreconditions;
 	private Button chRTCFeedback;
 	private boolean Activated;
-	
+
 	/**
 	 * Launch the application.
 	 * @param args
 	 */
-	
+
 	static ZoiperJavaMainWindow window;
 	Properties prop = new Properties();
-	
+
 	public static void main(String[] args) {
 		try {
 			window = new ZoiperJavaMainWindow();
@@ -172,69 +172,68 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		shlZoiperSdk = new Shell();
 		shlZoiperSdk.setSize(905, 750);
 		shlZoiperSdk.setText("Zoiper SDK");
-		
+
 		grpAddUser = new Group(shlZoiperSdk, SWT.NONE);
 		grpAddUser.setText("Add User");
 		grpAddUser.setBounds(12, 175, 517, 280);
-		
+
 		grpBAccountState = new Group(shlZoiperSdk, SWT.NONE);
 		grpBAccountState.setText("VoIP User");
 		grpBAccountState.setBounds(535, 25, 343, 430);
-		
+
 		grpSdkActivation = new Group(shlZoiperSdk, SWT.NONE);
 		grpSdkActivation.setText("SDK Activation");
 		grpSdkActivation.setBounds(10, 10, 192, 163);
-		
-		
+
 		grpCallControl = new Group(grpBAccountState, SWT.NONE);
 		grpCallControl.setText("Call Control");
 		grpCallControl.setBounds(84, 165, 251, 200);
-		
+
 		Label lblUser = new Label(grpSdkActivation, SWT.NONE);
 		lblUser.setText("User:");
 		lblUser.setBounds(10, 19, 55, 15);
-		
+
 		Label lblPassword = new Label(grpSdkActivation, SWT.NONE);
 		lblPassword.setText("Password:");
 		lblPassword.setBounds(10, 45, 55, 15);
-		
+
 		Label lblDebugLevel = new Label(grpSdkActivation, SWT.NONE);
 		lblDebugLevel.setText("Debug Level:");
 		lblDebugLevel.setBounds(10, 133, 68, 15);
-		
+
 		cbDebugLevel = new CCombo(grpSdkActivation, SWT.BORDER);
 		cbDebugLevel.setItems(new String[] {"None", "Critical", "Error", "Warning", "Info", "Debug", "Stack"});
 		cbDebugLevel.setBounds(95, 133, 80, 21);
 		cbDebugLevel.select(5);
-		
+
 		tbCertUserName = new Text(grpSdkActivation, SWT.BORDER);
 		tbCertUserName.setBounds(76, 14, 109, 21);
-		
+
 		tbCertPassword = new Text(grpSdkActivation, SWT.BORDER);
 		tbCertPassword.setBounds(76, 41, 109, 21);
-		
+
 		tbUserName = new Text(grpAddUser, SWT.BORDER);
 		tbUserName.setBounds(75, 13, 176, 20);
 
 		tbPassword = new Text(grpAddUser, SWT.BORDER);
 		tbPassword.setText("Password");
 		tbPassword.setBounds(75, 39, 176, 20);
-		
+
 		tbCallee = new Text(grpBAccountState, SWT.BORDER);
 		tbCallee.setBounds(84, 50, 137, 20);
-		
+
 		try {
 			//loadSettings();
 			tbCertUserName.setText(prop.getProperty("tbCertUserName"));
 			tbCertPassword.setText(prop.getProperty("tbCertPassword"));
 			tbUserName.setText(prop.getProperty("sipuser"));
 			tbCallee.setText(prop.getProperty("callee"));
-		} 
+		}
 		catch (Exception ex)
 		{
 			
 		}
-		
+
 		btnCertActivate = new Button(grpSdkActivation, SWT.NONE);
 		btnCertActivate.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -266,7 +265,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 						//config.EchoCancellation(EchoCancellation.Hardware);
 						//ec = config.EchoCancellation();
 					}
-	
+
 					String version = ctx.libraryVersion();
 					
 					ctx.setStatusListener(window);
@@ -286,9 +285,9 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 					{
 						LockGenerateContents();
 					}
-					
+
 					Result res = ctx.startContext();
-					
+
 					//Start logging sessions
 					LoggingLevel logLevel = LoggingLevel.valueOf(cbDebugLevel.getText());
 					ctx.logger().logOpen(path, null, logLevel, 0);
@@ -308,8 +307,8 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		});
 		btnCertActivate.setBounds(82, 68, 100, 25);
 		btnCertActivate.setText("Activate");
-		
-		
+
+
 		btnOfflineCertActivate = new Button(grpSdkActivation, SWT.NONE);
 		btnOfflineCertActivate.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -318,7 +317,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 					ctx = new Context();
 				}catch (UnsatisfiedLinkError err) {
 					String msg = err.getMessage();
-					
+
 					StringWriter sw = new StringWriter();
 					PrintWriter pw = new PrintWriter(sw);
 					err.printStackTrace(pw);
@@ -341,7 +340,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 						//config.EchoCancellation(EchoCancellation.Hardware);
 						//ec = config.EchoCancellation();
 					}
-	
+
 					String version = ctx.libraryVersion();
 					Result res = ctx.startContext();
 					
@@ -381,7 +380,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 								if (ctx != null)
 								{
 									ctx.activation().createOfflineActivationFileSDK(ActFoldPath + "\\" + tbCertUserName.getText()  + ".certificate" ,tbCertUserName.getText(), tbCertPassword.getText());
-								} 
+								}
 							}
 							});
 						btnCreateFile.setBounds(120,200,100,25);
@@ -393,12 +392,12 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 				catch(java.lang.NullPointerException ex)
 				{
 					String msg = ex.getMessage();
-					
+
 					StringWriter sw = new StringWriter();
 					PrintWriter pw = new PrintWriter(sw);
 					ex.printStackTrace(pw);
 					String sStackTrace = sw.toString();
-					
+
 					JOptionPane.showMessageDialog(null, sStackTrace, "InfoBox: " + msg, JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
@@ -512,7 +511,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		});
 		btnAddUser.setText("Add User");
 		btnAddUser.setBounds(40, 241, 75, 23);
-		
+
 		btnProbeSIP = new Button(grpAddUser, SWT.NONE);
 		btnProbeSIP.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -522,16 +521,15 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 				
 				if(probingAccount != null)
 				{
+					probingAccount.setProbeEventListener(window);
 					probingAccount.probeSipTransport(tbServer.getText(), "", tbUserName.getText(), tbUserName.getText(), tbPassword.getText());
-					
 				}
-				
 			}
 		});
 		btnProbeSIP.setText("Probe SIP");
 		btnProbeSIP.setBounds(135, 241, 75, 23);
-		
-	
+
+
 		tbServer = new Text(grpAddUser, SWT.BORDER);
 		tbServer.setText("sip4.zoiper.com");
 		tbServer.setBounds(75, 65, 176, 20);
@@ -539,7 +537,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		label1 = new Label(grpAddUser, SWT.NONE);
 		label1.setText("User Name:");
 		label1.setBounds(6, 16, 63, 13);
-		
+
 		label2 = new Label(grpAddUser, SWT.NONE);
 		label2.setText("Password:");
 		label2.setBounds(6, 42, 56, 13);
@@ -547,60 +545,60 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		label3 = new Label(grpAddUser, SWT.NONE);
 		label3.setText("Server:");
 		label3.setBounds(6, 68, 41, 13);
-		
+
 		lbUsers = new List(grpAddUser, SWT.NONE);
 		lbUsers.setBounds(260, 32, 242, 108);
-		
+
 		label4 = new Label(grpAddUser, SWT.NONE);
 		label4.setText("VoIP Users List:");
 		label4.setBounds(257, 16, 82, 13);
-		
+
 		cbTransportType = new CCombo(grpAddUser, SWT.BORDER);
 		cbTransportType.setItems(new String[] {"NA", "UDP", "TCP", "TLS"});
 		cbTransportType.setBounds(75, 91, 176, 21);
 		cbTransportType.select(1);
-		
+
 		Label lblTransport = new Label(grpAddUser, SWT.NONE);
 		lblTransport.setText("Transport:");
 		lblTransport.setBounds(6, 95, 63, 17);
-		
+
 		cbProtocolType = new CCombo(grpAddUser, SWT.BORDER);
 		cbProtocolType.setItems(new String[] {"SIP", "IAX"});
 		cbProtocolType.setBounds(75, 120, 176, 21);
 		cbProtocolType.select(0);
-		
+
 		Label lblProtocolType = new Label(grpAddUser, SWT.NONE);
 		lblProtocolType.setText("Protocol:");
 		lblProtocolType.setBounds(6, 120, 63, 13);
-		
+
 		chPrivacy = new Button(grpAddUser, SWT.CHECK);
 		chPrivacy.setBounds(10, 175, 55, 23);
 		chPrivacy.setText("Privacy");
-		
+
 		chSRTP = new Button(grpAddUser, SWT.CHECK);
 		chSRTP.setBounds(80, 175, 50, 23);
 		chSRTP.setText("SRTP");
-		
+
 		chZRTP = new Button(grpAddUser, SWT.CHECK);
 		chZRTP.setBounds(140, 175, 50, 23);
 		chZRTP.setText("ZRTP");
-		
+
 		chFMTP = new Button(grpAddUser, SWT.CHECK);
 		chFMTP.setBounds(200, 175, 50, 23);
 		chFMTP.setText("FMTP");
-		
+
 		chStun = new Button(grpAddUser, SWT.CHECK);
 		chStun.setBounds(10, 210, 55, 23);
 		chStun.setText("Stun");
-		
+
 		chPreconditions = new Button(grpAddUser, SWT.CHECK);
 		chPreconditions.setBounds(80, 210, 90, 23);
 		chPreconditions.setText("Preconditions");
-		
+
 		chRTCFeedback = new Button(grpAddUser, SWT.CHECK);
 		chRTCFeedback.setBounds(180, 210, 86, 23);
 		chRTCFeedback.setText("RTCFeedback");
-		
+
 		btnRegister = new Button(grpBAccountState, SWT.NONE);
 		btnRegister.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -615,7 +613,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		});
 		btnRegister.setBounds(146, 19, 75, 23);
 		btnRegister.setText("Register");
-		
+
 		btnUnregister = new Button(grpBAccountState, SWT.NONE);
 		btnUnregister.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -629,7 +627,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		});
 		btnUnregister.setBounds(227, 19, 75, 23);
 		btnUnregister.setText("Unregister");
-		
+
 		btnCreateCall = new Button(grpBAccountState, SWT.NONE);
 		btnCreateCall.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -643,15 +641,15 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		});
 		btnCreateCall.setBounds(227, 48, 75, 23);
 		btnCreateCall.setText("Create Call");
-		
+
 		lblCallee = new Label(grpBAccountState, SWT.NONE);
 		lblCallee.setText("Callee:");
 		lblCallee.setBounds(6, 53, 39, 13);
-		
+
 		label6 = new Label(grpBAccountState, SWT.NONE);
 		label6.setText("Transoprt:");
 		label6.setBounds(6, 94, 55, 13);
-		
+
 		btnStartRecording = new Button(grpCallControl, SWT.NONE);
 		btnStartRecording.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -682,15 +680,15 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		});
 		btnStopRecording.setBounds(87, 48, 75, 23);
 		btnStopRecording.setText("Stop Record");
-		
+
 		btnMessage = new Button(grpCallControl, SWT.NONE);
 		btnMessage.setBounds(168, 78, 75, 23);
 		btnMessage.setText("Message");
-		
+
 		btnVideo = new Button(grpCallControl, SWT.NONE);
 		btnVideo.setBounds(168, 19, 75, 23);
 		btnVideo.setText("Video");
-		
+
 		btnHoldCall = new Button(grpCallControl, SWT.NONE);
 		btnHoldCall.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -708,7 +706,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		});
 		btnHoldCall.setBounds(6, 19, 75, 23);
 		btnHoldCall.setText("Hold");
-		
+
 		btnMuteCall = new Button(grpCallControl, SWT.NONE);
 		btnMuteCall.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -726,7 +724,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		});
 		btnMuteCall.setBounds(168, 48, 75, 23);
 		btnMuteCall.setText("Mute");
-		
+
 		btnHangUp = new Button(grpCallControl, SWT.NONE);
 		btnHangUp.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -741,20 +739,19 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 				{
 					updateCalls = true;
 					ActiveCalls.remove(callString);
-					
 				}
 			}
 		});
 		btnHangUp.setBounds(87, 19, 75, 23);
 		btnHangUp.setText("Hang Up");
-		
+
 		btnAddToConference = new Button(grpCallControl, SWT.NONE);
 		btnAddToConference.setBounds(6, 78, 156, 23);
 		btnAddToConference.setText("Add To Conference");
-		
+
 		tbBlindTransfer = new Text(grpCallControl ,SWT.BORDER);
 		tbBlindTransfer.setBounds(6, 110, 110, 23);
-		
+
 		btnBlindTransfer = new Button(grpCallControl , SWT.NONE);
 		btnBlindTransfer.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -773,7 +770,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		});
 		btnBlindTransfer.setBounds(130, 110, 113, 24);
 		btnBlindTransfer.setText("Blind Transfer");
-		
+
 		btnAttTransfer = new Button(grpCallControl , SWT.NONE);
 		btnAttTransfer.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -794,39 +791,39 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		});
 		btnAttTransfer.setBounds(130, 140, 113, 24);
 		btnAttTransfer.setText("Attended Transfer");
-		
+
 		label7 = new Label(grpBAccountState, SWT.NONE);
 		label7.setText("Active Calls:");
 		label7.setBounds(6, 81, 65, 13);
-		
+
 		lbActiveCalls = new List(grpBAccountState, SWT.NONE);
 		lbActiveCalls.setBounds(84, 77, 218, 82);
-		
+
 		tbIsRegistered = new Text(grpBAccountState, SWT.BORDER);
 		tbIsRegistered.setBounds(84, 21, 56, 20);
 		
 		label5 = new Label(grpBAccountState, SWT.NONE);
 		label5.setText("Is Registered:");
 		label5.setBounds(6, 24, 72, 13);
-		
+
 		rtbRunLog = new StyledText(shlZoiperSdk, SWT.BORDER | SWT.READ_ONLY);
 		rtbRunLog.setEnabled(false);
 		rtbRunLog.setEditable(false);
 		rtbRunLog.setBounds(12, 465, 866, 250);
 
 	}
-	
+
 	public void LockGenerateContents()
 	{
-		synchronized(this){
-            try{
-                this.wait();
-            }catch(InterruptedException error){
-            	error.printStackTrace();
-            }
+		synchronized(this) {
+			try {
+				this.wait();
+			} catch(InterruptedException error) {
+				error.printStackTrace();
+			}
 		}
 	}
-	
+
 	public Account GetActiveUserAccount()
 	{
 		if (lbUsers.getSelectionCount() == 0)
@@ -845,10 +842,10 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		{
 			UnavailableAction();
 			return null;
-		}		
+		}
 		return ActiveCalls.get(lbActiveCalls.getSelection()[0]);
 	}
-	
+
 	public void AccountInfoRefresh(Account currentUser)
 	{
 		Call activeCall = GetActiveCall();
@@ -925,7 +922,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 
 	@Override
 	public void onCallNetworkStatistics(Call call, NetworkStatistics networkStatistics) {
-        OnZoiperEvent("OnCallNetworkStatistics TotalOutputBytes: " + networkStatistics.totalOutputBytes());
+	OnZoiperEvent("OnCallNetworkStatistics TotalOutputBytes: " + networkStatistics.totalOutputBytes());
 	}
 
 	@Override
@@ -1017,11 +1014,31 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 	public void onContextActivationCompleted(Context context, ActivationResult activationResult) {
 		if(activationResult.status() == ActivationStatus.Success)
 		{
-			synchronized(this){
+			synchronized(this) {
 				Activated = true;
-	            notify();
-	        }
+				notify();
+			}
 		}
-		
+	}
+
+	@Override
+	public void onProbeError(Account account, ProbeState curState, ExtendedError error) {
+		OnZoiperEvent("onProbeError curState: " + curState + ", error= " + error.message());
+	}
+
+	@Override
+	public void onProbeState(Account account, ProbeState newState) {
+		OnZoiperEvent("onProbeState newState: " + newState);
+	}
+
+	@Override
+	public void onProbeSuccess(Account account, TransportType transport) {
+		OnZoiperEvent("onProbeSuccess newState: " + transport);
+	}
+
+
+	@Override
+	public void onProbeFailed(Account account, ExtendedError error) {
+		OnZoiperEvent("onProbeFailed error= " + error.message());
 	}
 }
