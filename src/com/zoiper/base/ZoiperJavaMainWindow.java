@@ -253,6 +253,11 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 				
 				ContextConfiguration config = null;
 				try {
+					//Start logging sessions
+					String path = System.getProperty("user.dir") + "\\log.txt";
+					LoggingLevel logLevel = LoggingLevel.valueOf(cbDebugLevel.getText());
+					ctx.logger().logOpen(path, null, logLevel, 0);
+
 					config = ctx.configuration();
 					if (null != config)
 					{
@@ -267,11 +272,9 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 					}
 
 					String version = ctx.libraryVersion();
-					
+
 					ctx.setStatusListener(window);
-					//ContextAdvanced ctxAdv = ctx.Advanced();
-					String path = System.getProperty("user.dir") + "\\log.txt";
-					
+
 					if (ctx != null && ActFoldPath == "")
 					{
 						ctx.activation().startSDK(null, tbCertUserName.getText(), tbCertPassword.getText());
@@ -287,10 +290,6 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 					}
 
 					Result res = ctx.startContext();
-
-					//Start logging sessions
-					LoggingLevel logLevel = LoggingLevel.valueOf(cbDebugLevel.getText());
-					ctx.logger().logOpen(path, null, logLevel, 0);
 				}
 				catch(java.lang.NullPointerException ex)
 				{
