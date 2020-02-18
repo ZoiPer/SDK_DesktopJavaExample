@@ -5,12 +5,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.custom.*;
 import org.eclipse.swt.events.*;
-import org.eclipse.swt.layout.RowData;
 
-import java.awt.Component;
-import java.awt.KeyboardFocusManager;
-import java.awt.ScrollPane;
+import java.lang.Thread.UncaughtExceptionHandler;
+
 import java.awt.Toolkit;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,16 +24,12 @@ import javax.swing.JOptionPane;
 
 import com.zoiper.zdk.*;
 import com.zoiper.zdk.Configurations.*;
-import com.zoiper.zdk.Controllers.*;
 import com.zoiper.zdk.EventHandlers.*;
-import com.zoiper.zdk.Providers.*;
 import com.zoiper.zdk.Types.*;
 import com.zoiper.zdk.Types.Zrtp.*;
-import com.zoiper.base.*;
 
 
-
-public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHandler, AccountEventsHandler, SIPProbeEventsHandler {
+public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEventsHandler, CallEventsHandler, AccountEventsHandler, SIPProbeEventsHandler, VideoEventsHandler {
 
 	private Context ctx = null;
 	private Account account = null;
@@ -44,6 +39,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 	private Map<String, Call> ActiveCalls = new HashMap<String, Call>();
 	private boolean updateCalls = false;
 	private long callId = 0;
+	private VideoForm activeVideo = null;
 
 	protected Shell shlZoiperSdk;
 	protected Shell OfflineActivationSh;
@@ -122,33 +118,35 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		window.dispose();
 		System.exit(0);
 	}
 
-	private void loadSettings() {
-		InputStream input = null;
+	// private void loadSettings() {
+	// 	InputStream input = null;
 
-		try {
+	// 	try {
 
-			String home = System.getProperty("user.home");
+	// 		String home = System.getProperty("user.home");
 
-			input = new FileInputStream(home + "\\config.properties");
+	// 		input = new FileInputStream(home + "\\config.properties");
 
-			// load a properties file
-			prop.load(input);
+	// 		// load a properties file
+	// 		prop.load(input);
 			
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+	// 	} catch (IOException ex) {
+	// 		ex.printStackTrace();
+	// 	} finally {
+	// 		if (input != null) {
+	// 			try {
+	// 				input.close();
+	// 			} catch (IOException e) {
+	// 				e.printStackTrace();
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	/**
 	 * Open the window.
@@ -162,6 +160,15 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 			if (!display.readAndDispatch()) {
 				display.sleep();
 			}
+		}
+	}
+
+	/**
+	 * Gracefully dispose the ZDK.
+	 */
+	public void dispose() {
+		if (ctx != null) {
+			ctx.stopContext();
 		}
 	}
 
@@ -254,9 +261,9 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 				ContextConfiguration config = null;
 				try {
 					//Start logging sessions
-					String path = System.getProperty("user.dir") + "\\log.txt";
+					File logFile = new File(System.getProperty("user.dir"), "log.txt");
 					LoggingLevel logLevel = LoggingLevel.valueOf(cbDebugLevel.getText());
-					ctx.logger().logOpen(path, null, logLevel, 0);
+					ctx.logger().logOpen(logFile.getAbsolutePath(), null, logLevel, 0);
 
 					config = ctx.configuration();
 					if (null != config)
@@ -290,6 +297,8 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 					}
 
 					Result res = ctx.startContext();
+
+					ctx.videoControls().setFormat(VideoForm.resolution.width, VideoForm.resolution.height, 6);
 				}
 				catch(java.lang.NullPointerException ex)
 				{
@@ -634,6 +643,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 				Account acc = ActiveUsers.get(lbUsers.getSelection()[0]);
 				Call activeCall = acc.createCall(tbCallee.getText(), true, false);
 				activeCall.setCallStatusListener(window);
+				activeCall.setVideoCallNotificiationsListener(window);
 				ActiveCalls.put(tbCallee.getText(), activeCall);
 				updateCalls = true;
 			}
@@ -685,6 +695,15 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 		btnMessage.setText("Message");
 
 		btnVideo = new Button(grpCallControl, SWT.NONE);
+		btnVideo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Call activeCall = GetActiveCall();
+				if (activeCall != null) {
+					activeCall.offerVideo();
+				}
+			}
+		});
 		btnVideo.setBounds(168, 19, 75, 23);
 		btnVideo.setText("Video");
 
@@ -921,7 +940,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 
 	@Override
 	public void onCallNetworkStatistics(Call call, NetworkStatistics networkStatistics) {
-	OnZoiperEvent("OnCallNetworkStatistics TotalOutputBytes: " + networkStatistics.totalOutputBytes());
+		//OnZoiperEvent("OnCallNetworkStatistics TotalOutputBytes: " + networkStatistics.totalOutputBytes());
 	}
 
 	@Override
@@ -984,7 +1003,7 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 			}
 		}
 		else {
-				call.hangUp();
+			call.hangUp();
 		}
 		display.dispose();
 	}
@@ -1039,5 +1058,50 @@ public class ZoiperJavaMainWindow implements ContextEventsHandler, CallEventsHan
 	@Override
 	public void onProbeFailed(Account account, ExtendedError error) {
 		OnZoiperEvent("onProbeFailed error= " + error.message());
+	}
+
+	@Override
+	public void onVideoOffered(Call call) {
+		OnZoiperEvent("onVideoOffered");
+		activeVideo = new VideoForm(call);
+		call.acceptVideo(true);
+	}
+
+	@Override
+	public void onVideoStarted(Call call, OriginType origin) {
+		OnZoiperEvent("onVideoStarted: origin= " + origin);
+
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				activeVideo.start();
+			}
+		};
+		t.setName("video call");
+		t.setDaemon(true);
+		t.setUncaughtExceptionHandler(this);
+		t.start();
+	}
+
+	@Override
+	public void onVideoStopped(Call call, OriginType origin) {
+		OnZoiperEvent("onVideoStopped: origin= " + origin);
+		activeVideo.stop();
+	}
+
+	@Override
+	public void onVideoCameraChanged(Call call) {
+		OnZoiperEvent("onVideoCameraChanged");
+	}
+
+	@Override
+	public void onVideoFormatSelected(Call call, OriginType dir, int width, int height, float fps) {
+		OnZoiperEvent("onVideoStarted: direction= " + dir + ", width= " + width + ", height= " + height + ", fps= " + fps);
+	}
+
+	@Override
+	public void uncaughtException(Thread t, Throwable e) {
+		System.err.println(String.format("Exception in thread %s", t.getName()));
+		e.printStackTrace();
 	}
 }

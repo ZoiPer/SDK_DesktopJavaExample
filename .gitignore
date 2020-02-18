@@ -1,9 +1,14 @@
 /bin/
+/libs/
 
 /Documentation/
+
+log.txt
+*.log
 
 *.dll
 *.so
 zdk.java.jar
 zdk.jni.*
 swt.jar
+webcam-capture*.jar

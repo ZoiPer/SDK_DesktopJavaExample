@@ -13,5 +13,8 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="ZoiperJava"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="webcam-capture-0.3.10.jar"/>
+	<classpathentry kind="lib" path="libs/bridj-0.6.2.jar"/>
+	<classpathentry kind="lib" path="libs/slf4j-api-1.7.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
