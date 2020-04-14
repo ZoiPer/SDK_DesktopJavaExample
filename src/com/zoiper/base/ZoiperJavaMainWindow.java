@@ -924,8 +924,8 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 	}
 	
 	@Override
-	public void onContextSecureCertError(Context context, SecureCertData secureCert) {
-		OnZoiperEvent("OnContextSecureCertError ActualNameList: "  + secureCert.actualNameList());
+	public void onContextSecureCertStatus(Context context, SecureCertData secureCert) {
+		OnZoiperEvent("onContextSecureCertStatus ActualNameList: "  + secureCert.actualNameList());
 	}
 
 	@Override
