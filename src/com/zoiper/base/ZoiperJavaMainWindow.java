@@ -29,7 +29,7 @@ import com.zoiper.zdk.Types.*;
 import com.zoiper.zdk.Types.Zrtp.*;
 
 
-public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEventsHandler, CallEventsHandler, AccountEventsHandler, SIPProbeEventsHandler, VideoEventsHandler {
+public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEventsHandler, CallEventsHandler, AccountEventsHandler, SIPProbeEventsHandler {
 
 	private Context ctx = null;
 	private Account account = null;
@@ -643,7 +643,6 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 				Account acc = ActiveUsers.get(lbUsers.getSelection()[0]);
 				Call activeCall = acc.createCall(tbCallee.getText(), true, false);
 				activeCall.setCallStatusListener(window);
-				activeCall.setVideoCallNotificiationsListener(window);
 				ActiveCalls.put(tbCallee.getText(), activeCall);
 				updateCalls = true;
 			}
