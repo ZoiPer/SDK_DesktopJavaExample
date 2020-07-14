@@ -985,6 +985,8 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 	@Override
 	public void onAccountIncomingCall(Account account, Call call) {
 		//creating new display to show the window with instructions for activation
+		call.ringing(); // send the SIP 180 Ringing! Some servers "don't like" when this response is missing!
+
 		Display display = new Display();
 		Shell sh = new Shell(display);
 		call.setCallStatusListener(window);
