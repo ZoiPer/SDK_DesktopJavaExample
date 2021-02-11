@@ -268,7 +268,7 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 					config = ctx.configuration();
 					if (null != config)
 					{
-						config.sipPort(44444);
+						config.sipUdpPort(44444);
 						config.rtpPort(55555);
 
 						//config.EchoCancellation(EchoCancellation.Software);
@@ -339,7 +339,7 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 					config = ctx.configuration();
 					if (null != config)
 					{
-						config.sipPort(44444);
+						config.sipUdpPort(44444);
 						config.rtpPort(55555);
 
 						//config.EchoCancellation(EchoCancellation.Software);
