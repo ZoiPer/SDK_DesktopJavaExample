@@ -491,7 +491,6 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 					{
 						regCfg.sip().rtcpFeedback(RTCPFeedbackType.Off); // Include only AVP video media profile in the SDP
 					}
-
 				}
 				else if("IAX".equals(cbProtocolType.getText()))
 				{
@@ -943,7 +942,7 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 	}
 
 	@Override
-	public void onCallNetworkQualityLevel(Call call, int CallChannel, int QualityLevel) {
+	public void onCallNetworkQualityLevel(Call call, int CallChannel, NetworkQualityLevel QualityLevel) {
 		OnZoiperEvent("OnCallNetworkQualityLevel CallChannel: " + CallChannel + " QualityLevel: " + QualityLevel);
 	}
 
