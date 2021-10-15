@@ -988,6 +988,11 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 
 	@Override
 	public void onCallStatusChanged(Call call, CallStatus status) {
+		if (status.lineStatus() == CallLineStatus.Terminated)
+		{
+			updateCalls = true;
+			ActiveCalls.remove(call.calleeName());
+		}
 		OnZoiperEvent("OnCallStatusChanged: " + status.lineStatus().name());
 	}
 
