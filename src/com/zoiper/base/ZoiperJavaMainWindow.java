@@ -970,6 +970,44 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 	public void onCallTransferStarted(Call call, String name, String number, String URI) {
 		OnZoiperEvent("OnCallTransferStarted name: " + name + " number: " + number + " URI: " + URI);
 	}
+	
+	@Override
+	public void onCallZrtpFailed(Call call, ExtendedError error) {
+		OnZoiperEvent("onCallZrtpFailed: call= " + call.callHandle() + "; error= " + error.message());
+	}
+
+	@Override
+	public void onCallZrtpSuccess(Call call, String zidHex, int knownPeer, int cacheMismatch, int peerKnowsUs, ZRTPSASEncoding zrtpsasEncoding, String sas,
+								  ZRTPHashAlgorithm zrtpHashAlgorithm, ZRTPCipherAlgorithm zrtpCipherAlgorithm, ZRTPAuthTag zrtpAuthTag, ZRTPKeyAgreement zrtpKeyAgreement) {
+		if ((knownPeer != 0) && (cacheMismatch == 0) && (peerKnowsUs != 0))
+		{
+			call.confirmZrtpSas(true);
+		}
+		else
+		{
+			Display display = new Display();
+			Shell sh = new Shell(display);
+			call.setCallStatusListener(window);
+			OnZoiperEvent("onCallZrtpSuccess: ");
+			MessageBox messageBox = new MessageBox(sh, SWT.YES | SWT.NO);
+			messageBox.setMessage("SAS Verification is \"" + sas + "\". Please compare the string with your peer!");
+			messageBox.setText("SAS Verification");
+			if (messageBox.open() == SWT.YES)
+			{
+				call.confirmZrtpSas(true);
+			}
+			else
+			{
+				call.confirmZrtpSas(false);
+			}
+			display.dispose();
+		}
+	}
+
+	@Override
+	public void onCallZrtpSecondaryError(Call call, int channel, ExtendedError error) {
+		OnZoiperEvent("onCallZrtpSecondaryError: call= " + call.callHandle() + "; error= " + error.message());
+	}
 
 	@Override
 	public void onAccountStatusChanged(Account account, AccountStatus status, int statusCode) {
