@@ -298,6 +298,9 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 
 					Result res = ctx.startContext();
 
+					File zrtpCacheFile = new File(System.getProperty("user.dir"), "zrtpCache");
+					ctx.encryptionConfiguration().globalZrtpCache(zrtpCacheFile.getName());
+
 					ctx.videoControls().setFormat(VideoForm.resolution.width, VideoForm.resolution.height, 6);
 				}
 				catch(java.lang.NullPointerException ex)
