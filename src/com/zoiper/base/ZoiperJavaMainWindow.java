@@ -40,6 +40,7 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 	private boolean updateCalls = false;
 	private long callId = 0;
 	private VideoForm activeVideo = null;
+	private Conference conference = null;
 
 	protected Shell shlZoiperSdk;
 	protected Shell OfflineActivationSh;
@@ -74,6 +75,8 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 	private Button btnOfflineCertActivate;
 	private Button btnHoldCall;
 	private Button btnMuteCall;
+	private Button btnCreateConference;
+	private Button btnCloseConference;
 	private Button btnAddToConference;
 	private Button btnHangUp;
 	private Group grpCallControl;
@@ -692,7 +695,7 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 		btnStopRecording.setText("Stop Record");
 
 		btnMessage = new Button(grpCallControl, SWT.NONE);
-		btnMessage.setBounds(168, 78, 75, 23);
+		btnMessage.setBounds(6, 105, 75, 23);
 		btnMessage.setText("Message");
 
 		btnVideo = new Button(grpCallControl, SWT.NONE);
@@ -764,12 +767,66 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 		btnHangUp.setBounds(87, 19, 75, 23);
 		btnHangUp.setText("Hang Up");
 
+		btnCreateConference = new Button(grpCallControl, SWT.NONE);
+		btnCreateConference.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (!ActiveCalls.isEmpty() && (conference == null))
+				{
+					ArrayList<Call> calls = new ArrayList<Call>();
+					for (Map.Entry<String, Call> entry: ActiveCalls.entrySet())
+					{
+						calls.add(entry.getValue());
+					}
+					conference = ctx.conferenceProvider().createConference(calls);
+				}
+				else
+				{
+					UnavailableAction();
+				}
+			}
+		});
+		btnCreateConference.setBounds(6, 78, 75, 23);
+		btnCreateConference.setText("Create Conf");
+		
+		btnCloseConference = new Button(grpCallControl, SWT.NONE);
+		btnCloseConference.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if(conference != null)
+				{
+					conference.hangUp();
+					conference = null;
+				}
+				else
+				{
+					UnavailableAction();
+				}
+			}
+		});
+		btnCloseConference.setBounds(87, 78, 75, 23);
+		btnCloseConference.setText("Close Conf");
+		
 		btnAddToConference = new Button(grpCallControl, SWT.NONE);
-		btnAddToConference.setBounds(6, 78, 156, 23);
-		btnAddToConference.setText("Add To Conference");
-
+		btnAddToConference.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Call call = GetActiveCall();
+				if ((call != null) && (conference != null))
+				{
+					conference.addCall(call);
+				}
+				else
+				{
+					UnavailableAction();
+				}
+			}
+		});
+		btnAddToConference.setBounds(168, 78, 75, 23);
+		btnAddToConference.setText("Add To Conf");
+		
 		tbBlindTransfer = new Text(grpCallControl ,SWT.BORDER);
-		tbBlindTransfer.setBounds(6, 110, 110, 23);
+		tbBlindTransfer.setBounds(6, 137, 110, 23);
 
 		btnBlindTransfer = new Button(grpCallControl , SWT.NONE);
 		btnBlindTransfer.addSelectionListener(new SelectionAdapter() {
@@ -787,7 +844,7 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 				}
 			}
 		});
-		btnBlindTransfer.setBounds(130, 110, 113, 24);
+		btnBlindTransfer.setBounds(130, 137, 113, 24);
 		btnBlindTransfer.setText("Blind Transfer");
 
 		btnAttTransfer = new Button(grpCallControl , SWT.NONE);
@@ -808,7 +865,7 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 				}
 			}
 		});
-		btnAttTransfer.setBounds(130, 140, 113, 24);
+		btnAttTransfer.setBounds(130, 167, 113, 24);
 		btnAttTransfer.setText("Attended Transfer");
 
 		label7 = new Label(grpBAccountState, SWT.NONE);
