@@ -15,10 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import javax.swing.JOptionPane;
 
@@ -27,7 +24,7 @@ import com.zoiper.zdk.Configurations.*;
 import com.zoiper.zdk.EventHandlers.*;
 import com.zoiper.zdk.Types.*;
 import com.zoiper.zdk.Types.Zrtp.*;
-
+import org.eclipse.swt.widgets.List;
 
 public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEventsHandler, CallEventsHandler, AccountEventsHandler, SIPProbeEventsHandler {
 
@@ -444,6 +441,10 @@ public class ZoiperJavaMainWindow implements UncaughtExceptionHandler, ContextEv
 					regCfg.sip().enableSRTP(chSRTP.getSelection());
 					regCfg.sip().enableVideoFMTP(chFMTP.getSelection());
 					regCfg.sip().enablePreconditions(chPreconditions.getSelection());
+
+					HeaderField customHeader = ctx.accountProvider().createSIPHeaderField("CustomHeaderName",
+                                                                                          Arrays.asList("value1,value2"),SipMethodTypes.All);
+                    regCfg.sip().additionalHeaders(Arrays.asList(customHeader));
 
 					if(chZRTP.getSelection())
 					{
